@@ -67,48 +67,26 @@ v. We wrote the function called symDiff and it performs symbolic differentiation
 
 
 2.2
+In 2.2, `freevars` was modified to handle receiving let bindings containing a list of variable bindings.
 
+This required extracting all variable bindings in the right-hand side of the let bindings list.
+This was done through a recursive `rhsEval` function, which unions the bindings contained in the right-hand side with the rest of the bindings.
+Once this functions has finished evaluation, it will return a list of all variables declared in the right-hand side of the let bindings list.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Additionally, it was also required to extract all variables declarations contained in the let bindings list, this was done in `getVars`, which linearly extracted all variables.
+With these variables extracted, we could use union and minus to compute the number of free variables.
 
 2.3
+In 2.3, `tcomp` was handle let bindings containing lists of bindings.
+This was done by creating a *tail recursive*, using **continuations**, `letLoop`.
+`letLoop` converts each binding in the list into a `TLet`, where the left-hand side contains the current binding, and the right-hand side contains the next binding.
+Finally, once all bindings have been converted to `TLet`, the body of the let binding is evaluated.
 
+This means that the following holds true
+```
+tcomp (Let([ "x1", Prim("+", CstI 5, CstI 7); "x2", Prim("*", Var "x1", CstI 2) ], Prim("+", Var "x1", Var "x2"))) [] = TLet(
+    TPrim("+", TCstI 5, TCstI 7),
+    TLet(TPrim("*", TVar 0, TCstI 2), TPrim("+", TVar 1, TVar 0))
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Which shows that the list of Let bindings is converted into a set of nested TLet bindings.
