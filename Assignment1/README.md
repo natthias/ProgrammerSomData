@@ -22,49 +22,29 @@ v. We wrote the function called symDiff and it performs symbolic differentiation
 
 1.4
 
+i. We chose to use the *Java file* provided with the book, as it answered this question directly.
 
+ii. We chose to use *Max*, *Min*, and *`==`* as we did in Assignment 1.2. We chose to print them in the same way that `max` and `min` are printed in standard code—with the operator in front and the two numbers separated by a comma, e.g., `Max(9, 5)`.
 
+iii. We added the operation to the *`eval` function*, and it worked as expected using Java's built-in `Math` package.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+iv. We used the rules from *Exercise 1.2* and implemented them by using `instanceof CstI c`, then checking the value of `c` to see if the expression could be simplified:
 
 2.1
+We answered this question by first changing the expr type as stated by the question, making all expressions follow this new language.
 
+Then, to make sure that the eval function still worked, we added a tail-recursive helper function letEval. It takes the list of bindings and the environment, evaluates each binding, prepends it to the environment, and recurses until the list of let bindings is empty, where it returns the updated environment.
 
+In the main match statement, if let is matched, the helper function is called first to produce an updated environment, and then the statement body is evaluated based on that new environment.
 
+The helper function
+```F#
+    let rec letEval (bindings: (string * expr) list) env : ((string * int) list) =
+        match bindings with
+        | [] -> env
+        | (var, erhs) :: x -> eval erhs env |> fun res -> (var, res) :: env |> fun env' -> letEval x env'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 2.2
 In 2.2, `freevars` was modified to handle receiving let bindings containing a list of variable bindings.
