@@ -55,6 +55,8 @@ rule Token = parse
   | '%'             { MOD }
   | '('             { LPAR }
   | ')'             { RPAR }
+  | "&&"            { AND } (* XXX: this was added to convert "&&" into the corresponding token, which the parser understands *)
+  | "||"            { OR } (* XXX: this was added to convert "||" into the corresponding token, which the parser understands *)
   | eof             { EOF }
   | _               { failwith "Lexer error: illegal symbol" }
 
