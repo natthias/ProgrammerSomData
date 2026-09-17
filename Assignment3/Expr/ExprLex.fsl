@@ -14,6 +14,7 @@ let lexemeAsString lexbuf =
 (* Scan keywords as identifiers and use this function to distinguish them. *)
 (* If the set of keywords is large, use a hashtable instead.               *)
 
+// XXX: if, then, else keywords were added
 let keyword s =
     match s with
     | "if"   -> IF

@@ -268,7 +268,7 @@ let rec rcomp e : rinstr list =
 type sinstr =
     | SCstI of int (* push integer           *)
     | SVar of int (* push variable from env *)
-    | SIf
+    | SIf (* XXX: Added for if statement *)
     | SAdd (* pop args, push sum     *)
     | SSub (* pop args, push diff.   *)
     | SMul (* pop args, push product *)
@@ -283,7 +283,7 @@ let rec seval (inss: sinstr list) stack =
         match ins0, stack with
         | SCstI i, _ -> seval rest (i :: stack)
         | SVar i, _ -> seval rest (stack.[i] :: stack)
-        | SIf, i2 :: i1 :: pred :: stkr ->
+        | SIf, i2 :: i1 :: pred :: stkr -> // XXX: This handles if statemnts by putting the correct instruction back onto the stack
             if pred <> 0 then
                 seval rest (i1 :: stkr)
             else
@@ -313,7 +313,10 @@ let rec scomp e (cenv: rtvalue list) : sinstr list =
     match e with
     | CstI i -> [ SCstI i ]
     | Var x -> [ SVar(getindex cenv (Bound x)) ]
-    | If(pred, e1, e2) -> scomp pred cenv @ scomp e1 cenv @ scomp e2 cenv @ [ SIf ]
+    | If(pred, e1, e2) ->
+        // XXX: This evaluates all paths of the if statemnt eagerly
+        // so the correct one can be chosen in seval
+        scomp pred cenv @ scomp e1 cenv @ scomp e2 cenv @ [ SIf ]
     | Let(x, erhs, ebody) -> scomp erhs cenv @ scomp ebody (Bound x :: cenv) @ [ SSwap; SPop ]
     | Prim("+", e1, e2) -> scomp e1 cenv @ scomp e2 (Intrm :: cenv) @ [ SAdd ]
     | Prim("-", e1, e2) -> scomp e1 cenv @ scomp e2 (Intrm :: cenv) @ [ SSub ]
@@ -343,5 +346,6 @@ let intsToFile (inss: int list) (fname: string) =
     let text = String.concat " " (List.map string inss)
     System.IO.File.WriteAllText(fname, text)
 
+// XXX: This was added to compile strings in to sinstr lists
 let compString str : sinstr list =
     fromString str |> fun expr -> scomp expr []

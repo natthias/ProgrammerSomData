@@ -4,6 +4,7 @@
 
 module Absyn
 
+// XXX: here we added a If element to the discriminated union
 type expr =
     | CstI of int
     | Var of string
