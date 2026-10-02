@@ -66,6 +66,8 @@ rule Token = parse
   | "&&"            { SEQAND }                     
   | "&"             { AMP }                     
   | "!"             { NOT }                     
+  | "++"            { PREINC }                     (*XXX: we added this to support PREINC*)
+  | "--"            { PREDEC }                     (*XXX: we added this to support PREDEC*)
   | '('             { LPAR }
   | ')'             { RPAR }
   | '{'             { LBRACE }

@@ -14,6 +14,7 @@ type typ =
     | TypP of typ (* Pointer type                *)
 
 and expr =
+    // XXX: we added this for pre{inc,dec}
     | PreInc of access (* C/C++/Java/C# ++i or ++a[e] *)
     | PreDec of access (* C/C++/Java/C# --i or --a[e] *)
     | Access of access (* x    or  *p    or  a[e]     *)
