@@ -1,0 +1,7 @@
+// ex30.lc -- a listC source program 
+// Allocates many cons cells, which immediately die and can be collected
+
+void main() {
+  const int x;
+  x = 1;
+}
