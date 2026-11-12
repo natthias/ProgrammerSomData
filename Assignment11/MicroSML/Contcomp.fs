@@ -342,7 +342,7 @@ let rec cExpr (kind: int -> var) (varEnv: varEnv) (e: expr<typ, typescheme>) (C:
                       :: Label labexn
                       :: (cExpr kind varEnv e2 (Label labend :: C)))))
     | Pair(e1, e2, _) -> // XXX @Jon: 13.2
-        cExpr kind varEnv e1 (cExpr kind varEnv e2 (PAIR :: GETSP :: C))
+        cExpr kind varEnv e1 (cExpr kind varEnv e2 (PAIR :: C))
 
 
 // genValdecEnv returns two environments (nextEnv,vdEnv):

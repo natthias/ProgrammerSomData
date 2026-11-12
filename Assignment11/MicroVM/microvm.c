@@ -717,12 +717,9 @@ int execcode(word p[], word s[], word iargs[], int iargc,
       sp++;
       break;
     case PAIR: { // XXX @Jon: 13.2
-      word tag = p[pc++];
-      static const word size = 2;
-      word *ptr = allocate(tag, size, s, sp);
-      for (int i = 0; i < size; ++i) {
-        ptr[i + 1] = s[sp - size + i];
-      }
+      word *ptr = allocate(PAIRTAG, 2, s, sp);
+      ptr[1] = (word)s[sp - 1];
+      ptr[2] = (word)s[sp];
       s[sp - 1] = (word)ptr;
       sp--;
     } break;

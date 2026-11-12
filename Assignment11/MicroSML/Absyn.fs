@@ -252,4 +252,22 @@ and freevarsValdec (fvs, bvs) =
 // Alpha conversion is implemented as an exercise.
 // Exampels ex11.sml, ex15.sml and ex16.sml do not work without alpha
 // conversion.
-let alphaConv p : program<'a, 'b> = p
+// let alphaConv p : program<'a, 'b> =
+//   let varNo = ref 0
+//   let freshVar (x:string) = (varNo := !varNo+1;x + (!varNo).ToString())
+
+//   let lookup (v:string) env : string =
+//     match List.tryFind (fun (x,_) -> x=v) env with
+//       None -> failwith ("alphaConv: Can't lookup variable " + v)
+//     | Some (_,v') -> v'
+
+//   let rec aExpr env e =
+//     match e with
+//     | CstI _ -> ...
+//     ...
+//   and aValdec' env = function
+//     | Valdec(x,eRhs) -> ...
+//     ...
+//   and aProg' = function
+//     | Prog (valdecs,body) -> ...
+//   aProg' p
