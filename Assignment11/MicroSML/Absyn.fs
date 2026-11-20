@@ -249,27 +249,66 @@ and freevarsValdec (fvs, bvs) =
 
         (funFree, bvs + fEnv)
 
-// Alpha conversion is implemented as an exercise.
-// Exampels ex11.sml, ex15.sml and ex16.sml do not work without alpha
-// conversion.
-let alphaConv p : program<'a,'b> =
-  let freshVar (x:string) = x + Util.newNum().ToString()
+// XXX:    ____      _
+// XXX:   / __ \    | | ___  _ __
+// XXX:  / / _` |_  | |/ _ \| '_ \
+// XXX: | | (_| | |_| | (_) | | | |
+// XXX:  \ \__,_|\___/ \___/|_| |_|
+// XXX:   \____/
+let alphaConv p : program<'a, 'b> =
+    let freshVar (x: string) = x + Util.newNum().ToString()
 
-  let lookup (v:string) env : string =
-    match List.tryFind (fun (x,_) -> x=v) env with
-      None -> failwith ("Absyn.alphaConv: Can't lookup variable " + v)
-    | Some (_,v') -> v'
+    let lookup (v: string) env : string =
+        match List.tryFind (fun (x, _) -> x = v) env with
+        | None -> failwith ("Absyn.alphaConv: Can't lookup variable " + v)
+        | Some(_, v') -> v'
 
-  let rec aExpr env e =
-    match e with
-    | CstI _ -> e
-  and aValdec' env = function
-    | Valdec(x,eRhs,bOpt) -> 
-        let x = freshVar x
-        Valdec(x,eRhs,bOpt) :: env
+    let rec aExpr env e =
+        match e with
+        | CstI _
+        | CstB _
+        | CstN _ -> e
+        | Var(x, opt) -> Var(lookup x env, opt)
+        | Prim1(ope, e1, opt) -> Prim1(ope, aExpr env e1, opt)
+        | Prim2(ope, e1, e2, opt) -> Prim2(ope, aExpr env e1, aExpr env e2, opt)
+        | AndAlso(e1, e2, opt) -> AndAlso(aExpr env e1, aExpr env e2, opt)
+        | OrElse(e1, e2, opt) -> OrElse(aExpr env e1, aExpr env e2, opt)
+        | Seq(e1, e2, opt) -> Seq(aExpr env e1, aExpr env e2, opt)
+        | Let(valdecs, letBody) ->
+            let valdecs', env' = aValdecs' env valdecs
+            let letBody' = aExpr env' letBody
+            Let(valdecs', letBody')
+        | If(e1, e2, e3) -> If(aExpr env e1, aExpr env e2, aExpr env e3)
+        | Fun(x, fBody, opt) -> Fun(lookup x env, aExpr env fBody, opt)
+        | Call(eFun, eArg, bOpt, aOpt) -> Call(aExpr env eFun, aExpr env eArg, bOpt, aOpt)
+        | Raise(e1, opt) -> Raise(aExpr env e1, opt)
+        | TryWith(e1, ExnVar exn, e2) -> TryWith(aExpr env e1, ExnVar exn, aExpr env e2)
+        | Pair(e1, e2, opt) -> Pair(aExpr env e1, aExpr env e2, opt)
 
-  and aValdecs' env valdecs = ...
-  and aProg' = function
-    | Prog (valdecs,body) -> ...
-  aProg' p
+    and aValdec' env =
+        function
+        | Valdec(x, eRhs, bOpt) ->
+            let x' = freshVar x
+            let env' = (x, x') :: env
+            let eRhs' = aExpr env' eRhs
+            Valdec(x', eRhs', bOpt), env'
+        | _ -> failwith "not a valdec"
 
+    and aValdecs' env valdecs =
+        let rec loop acc env valdecs =
+            match valdecs with
+            | [] -> List.rev acc, env
+            | valdec :: valdecs ->
+                let valdec', env' = aValdec' env valdec
+                loop (valdec' :: acc) env' valdecs
+
+        loop [] env valdecs
+
+    and aProg' =
+        function
+        | Prog(valdecs, body) ->
+            let valdecs', env' = aValdecs' [] valdecs
+            let body' = aExpr env' body
+            Prog(valdecs', body')
+
+    aProg' p
